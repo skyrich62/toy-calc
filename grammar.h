@@ -39,13 +39,13 @@ struct binary_adding_operator: sor<PLUS, MINUS> { };
 struct binary_multiplying_operator : sor<STAR, SLASH> { };
 
 template<typename T>
-struct error : until< sor< T, eolf> > { };
+struct skipping : until< sor< T, eolf> > { };
 
 template<typename R>
 struct missing : success { };
 
 template<typename R, typename T>
-struct expected : seq<missing<R>, error<T>> { };
+struct expected : seq<missing<R>, skipping<T>> { };
 
 template<typename R, typename T = R>
 struct recover : sor<R, expected<R, T>> { };
