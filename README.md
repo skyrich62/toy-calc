@@ -45,3 +45,56 @@ The idea being that sometimes we might want to skip until we see an
 appropriate terminating token, but sometimes we just want to act like
 the thing we wanted was there anyway, and skip nothing.
 
+## Sample runs
+
+I've added a `recognizer` class which simply decodes what was recognized
+from the input.
+
+First, a parse of a correct input:
+```
+$ ./main 'a;'
+a;:1:0(0): *** Recognized a grammar::identifier: a
+a;:1:0(0): *** Recognized a grammar::factor: a
+a;:1:0(0): *** Recognized a grammar::term: a
+a;:1:0(0): *** Recognized a grammar::expression: a
+a;:1:1(1): *** Recognized a grammar::SEMI: ;
+a;:1:0(0): *** Recognized a grammar::statement: a;
+Good parse
+```
+
+Now, let's forget the semicolon:
+
+```
+./main 'a'
+a:1:0(0): *** Recognized a grammar::identifier: a
+a:1:0(0): *** Recognized a grammar::factor: a
+a:1:0(0): *** Recognized a grammar::term: a
+a:1:0(0): *** Recognized a grammar::expression: a
+a:1:1(1): expected a semicolon
+a:1:0(0): *** Recognized a grammar::statement: a
+Bad parse
+```
+
+Now, let's forget a term:
+
+```
+./main 'a+;'
+a+;:1:0(0): *** Recognized a grammar::identifier: a
+a+;:1:0(0): *** Recognized a grammar::factor: a
+a+;:1:0(0): *** Recognized a grammar::term: a
+a+;:1:1(1): *** Recognized a grammar::binary_adding_operator: +
+a+;:1:2(2): expected a term
+a+;:1:0(0): *** Recognized a grammar::expression: a+
+a+;:1:2(2): *** Recognized a grammar::SEMI: ;
+a+;:1:0(0): *** Recognized a grammar::statement: a+;
+Bad parse
+```
+
+With proper state information, (perhaps an AST), then we could correctly
+identify the "statement" above as something like:
+
+```
+a+;:1:0(0): *** Recognized a grammar::statement: a+<error_missing_operand>;
+```
+
+But that's an exercise for another time. :)
