@@ -50,27 +50,24 @@ struct expected : seq<missing<R>, skipping<T>> { };
 template<typename R, typename T = R>
 struct recover : sor<R, expected<R, T>> { };
 
+template<typename Rule, typename Sep, typename Terminator>
+struct recover_list : seq<
+                        Rule,
+                        star<
+                          Sep,
+                          recover<Rule, Terminator>
+                        >
+                      > { };
+
 struct term;
 struct factor;
 
 struct expression : seq<
                       opt<unary_adding_operator>,
-                      seq<
-                        term,
-                        star<
-                          binary_adding_operator,
-                          recover<term, success>
-                        >
-                      >
+                      recover_list<term, binary_adding_operator, success>
                     > { };
 
-struct term : seq<
-                factor,
-                star<
-                  binary_multiplying_operator,
-                  recover<factor, success>
-                >
-              > { };
+struct term : recover_list<factor, binary_multiplying_operator, success> { };
 
 struct factor : sor<
                   seq<
