@@ -61,6 +61,12 @@ struct missing
                   << ": expected "
                   << expected_message
                   << std::endl;
+        std::cout << in.position().source
+                  << std::endl
+                  << std::setw(in.position().byte_in_line+1)
+                  << std::right
+                  << "^"
+                  << std::endl;
     }
 };
 
@@ -141,7 +147,10 @@ int main(int argc, char *argv[])
            if (res && (parse_errors == 0u)) {
              std::cout << "Good parse" << std::endl;
            } else {
-             std::cout << "Bad parse" << std::endl;
+             std::cout << "Bad parse, "
+                       << parse_errors
+                       << " errors found."
+                       << std::endl;
            }
        } catch (const tao::pegtl::parse_error &e) {
            std::cout << e.what() << std::endl;
