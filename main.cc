@@ -2,7 +2,7 @@
 #include <iomanip>
 #include "grammar.h"
 #include "tao/pegtl/analyze.hpp"
-#include "tao/pegtl/tracer.hpp"
+//#include "tao/pegtl/tracer.hpp"
 #include "tao/pegtl/argv_input.hpp"
 
 static size_t indent = 0u;
@@ -46,6 +46,29 @@ template<typename Rule> struct tracer : tao::pegtl::normal<Rule>
     }
 };
 
+template<typename Rule>
+struct controls : tao::pegtl::normal<Rule> { };
+
+#ifdef TRACE
+#define TRACER(Rule) template<> struct controls<Rule> : tracer<Rule> { };
+#else
+#define TRACER(Rule)
+#endif
+
+TRACER(grammar::expression)
+TRACER(grammar::term)
+TRACER(grammar::factor)
+TRACER(grammar::PLUS_sym)
+TRACER(grammar::MINUS_sym)
+TRACER(grammar::STAR_sym)
+TRACER(grammar::SLASH_sym)
+TRACER(grammar::SEMI_sym)
+TRACER(grammar::statement)
+TRACER(grammar::identifier)
+TRACER(grammar::number)
+TRACER(grammar::LPAR_sym)
+TRACER(grammar::RPAR_sym)
+
 template<typename Rule> struct actions : tao::pegtl::nothing<Rule> { };
 
 template<typename Expected>
@@ -80,7 +103,8 @@ ERROR(grammar::expression, "an expression")
 ERROR(grammar::SEMI, "a semicolon")
 ERROR(grammar::identifier, "an identifier")
 ERROR(grammar::number, "a number")
-ERROR(grammar::RPAR, "a right parenthesis");
+ERROR(grammar::RPAR, "a right parenthesis")
+ERROR(grammar::statement, "a statement")
 
 using rpar_or_semi = tao::pegtl::sor<grammar::RPAR, grammar::SEMI>;
 ERROR(rpar_or_semi, "a right paren")
@@ -115,19 +139,20 @@ RECOGNIZER(grammar::SEMI)
 RECOGNIZER(grammar::statement)
 RECOGNIZER(grammar::identifier)
 RECOGNIZER(grammar::number)
+RECOGNIZER(grammar::LPAR)
+RECOGNIZER(grammar::RPAR)
 
 int main(int argc, char *argv[])
 {
    struct grammar: tao::pegtl::must<
-                                 tao::pegtl::plus<::grammar::statement>,
+                                 tao::pegtl::plus<
+                                   ::grammar::recover<
+                                     ::grammar::statement,
+                                     ::grammar::SEMI
+                                   >
+                                 >,
                                  tao::pegtl::eof
                                > { };
-
-#ifdef TRACE
-#define controls tracer
-#else
-#define controls tao::pegtl::normal
-#endif
 
 
    if (argc == 1) {
