@@ -13,4 +13,4 @@ clean:
 	rm -rf main.o main
 
 trace:
-	$(MAKE) TRACE=-DTRACE all
+	$(MAKE) TRACE=-DTRACE clean all
