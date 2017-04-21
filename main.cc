@@ -6,7 +6,6 @@
 #include "tao/pegtl/argv_input.hpp"
 
 static size_t indent = 0u;
-static size_t parse_errors = 0u;
 
 template<typename Rule> struct tracer : tao::pegtl::normal<Rule>
 {
@@ -77,7 +76,7 @@ struct missing
     static const std::string expected_message;
 
     template<typename Input>
-    static void apply(const Input &in)
+    static void apply(const Input &in, int &parse_errors)
     {
         ++parse_errors;
         std::cout << in.position()
@@ -113,7 +112,7 @@ template<typename Rule>
 struct recognizer
 {
     template <typename Input>
-    static void apply(Input &in)
+    static void apply(Input &in, const int &parse_errors)
     {
         if (in.string().empty()) {
             return;
@@ -164,11 +163,12 @@ int main(int argc, char *argv[])
        return 0;
    }
    for (decltype(argc) i = 1; i < argc; ++i) {
+       int parse_errors = 0;
        try {
            tao::pegtl::argv_input<> file(argv, i, argv[i]);
            //tao::pegtl::file_parser parser(file);
            //parser.parse<grammar, actions, controls>();
-           auto res = tao::pegtl::parse<grammar, actions, controls>(file);
+           auto res = tao::pegtl::parse<grammar, actions, controls>(file, parse_errors);
            if (res && (parse_errors == 0u)) {
              std::cout << "Good parse" << std::endl;
            } else {
