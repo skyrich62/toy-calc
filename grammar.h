@@ -26,7 +26,7 @@ struct LPAR  : pad<LPAR_sym,  ignore> { };
 struct RPAR  : pad<RPAR_sym,  ignore> { };
 struct SEMI  : pad<SEMI_sym,  ignore> { };
 
-struct identifier_fist : ranges<'a', 'z', 'A', 'Z'> { };
+struct identifier_first : ranges<'a', 'z', 'A', 'Z'> { };
 struct identifier_next : ranges<'a', 'z', 'A', 'Z', '0', '9', '_'> { };
 
 struct identifier : seq<
