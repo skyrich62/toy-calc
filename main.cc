@@ -1,5 +1,6 @@
 #include <iostream>
 #include <iomanip>
+#include "states.h"
 #include "grammar.h"
 #include "tao/pegtl/analyze.hpp"
 //#include "tao/pegtl/tracer.hpp"
@@ -131,31 +132,21 @@ template<> struct actions<Rule> : recognizer<Rule> { };
 RECOGNIZER(grammar::expression)
 RECOGNIZER(grammar::term)
 RECOGNIZER(grammar::factor)
-RECOGNIZER(grammar::unary_adding_operator)
-RECOGNIZER(grammar::binary_adding_operator)
-RECOGNIZER(grammar::binary_multiplying_operator)
-RECOGNIZER(grammar::SEMI)
+//RECOGNIZER(grammar::unary_adding_operator)
+//RECOGNIZER(grammar::binary_adding_operator)
+//RECOGNIZER(grammar::binary_multiplying_operator)
+//RECOGNIZER(grammar::SEMI)
 RECOGNIZER(grammar::statement)
-RECOGNIZER(grammar::identifier)
-RECOGNIZER(grammar::number)
-RECOGNIZER(grammar::LPAR)
-RECOGNIZER(grammar::RPAR)
+//RECOGNIZER(grammar::identifier)
+//RECOGNIZER(grammar::number)
+//RECOGNIZER(grammar::LPAR)
+//RECOGNIZER(grammar::RPAR)
 
 int main(int argc, char *argv[])
 {
-   struct grammar: tao::pegtl::must<
-                                 tao::pegtl::plus<
-                                   ::grammar::recover<
-                                     ::grammar::statement,
-                                     ::grammar::SEMI
-                                   >
-                                 >,
-                                 tao::pegtl::eof
-                               > { };
-
 
    if (argc == 1) {
-       const size_t issues_found = tao::pegtl::analyze<grammar>();
+       const size_t issues_found = tao::pegtl::analyze<grammar::compilation>();
        std::cout << "Grammar analyzed, found "
                  << issues_found
                  << " issues."
@@ -168,7 +159,7 @@ int main(int argc, char *argv[])
            tao::pegtl::argv_input<> file(argv, i, argv[i]);
            //tao::pegtl::file_parser parser(file);
            //parser.parse<grammar, actions, controls>();
-           auto res = tao::pegtl::parse<grammar, actions, controls>(file, parse_errors);
+           auto res = tao::pegtl::parse<grammar::compilation, actions, controls>(file, parse_errors);
            if (res && (parse_errors == 0u)) {
              std::cout << "Good parse" << std::endl;
            } else {

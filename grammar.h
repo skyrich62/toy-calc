@@ -80,7 +80,12 @@ struct factor : sor<
                 > { };
 
 
-struct statement : seq<expression, recover<SEMI, pad<success, ignore>>> { };
+struct statement : seq< recover<expression, opt<ignore>>, SEMI> { };
+
+struct compilation :seq<
+                      plus<recover<statement, SEMI>>,
+                      eof
+                    > { };
 
 } // namespace grammar
 
