@@ -9,7 +9,7 @@ The basic notion is the classes:
 Consider the following PEG
 
 ```
-expression ← ?unary_adding_operator term *(binary_adding_operator term)
+expression ← unary_adding_operator? term (binary_adding_operator term)*
 ```
 
 If there is a `binary_adding_operator`, then there must be a `term`, so if
