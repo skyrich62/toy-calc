@@ -2,11 +2,13 @@
 #include <iomanip>
 #include "states.h"
 #include "grammar.h"
+#include "pvisitor.h"
+
 #include "tao/pegtl/analyze.hpp"
-//#include "tao/pegtl/tracer.hpp"
 #include "tao/pegtl/argv_input.hpp"
 
 static size_t indent = 0u;
+static size_t parse_errors = 0u;
 
 template<typename Rule> struct tracer : tao::pegtl::normal<Rule>
 {
@@ -76,8 +78,8 @@ struct missing
 {
     static const std::string expected_message;
 
-    template<typename Input>
-    static void apply(const Input &in, int &parse_errors)
+    template<typename Input, typename... States>
+    static void apply(const Input &in, States&& ...st)
     {
         ++parse_errors;
         std::cout << in.position()
@@ -112,8 +114,8 @@ ERROR(rpar_or_semi, "a right paren")
 template<typename Rule>
 struct recognizer
 {
-    template <typename Input>
-    static void apply(Input &in, const int &parse_errors)
+    template <typename Input, typename... States>
+    static void apply(Input &in, States&& ...st)
     {
         if (in.string().empty()) {
             return;
@@ -129,18 +131,37 @@ struct recognizer
 #define RECOGNIZER(Rule) \
 template<> struct actions<Rule> : recognizer<Rule> { };
 
-RECOGNIZER(grammar::expression)
-RECOGNIZER(grammar::term)
-RECOGNIZER(grammar::factor)
+//RECOGNIZER(grammar::expression)
+//RECOGNIZER(grammar::term)
+//RECOGNIZER(grammar::factor)
 //RECOGNIZER(grammar::unary_adding_operator)
 //RECOGNIZER(grammar::binary_adding_operator)
 //RECOGNIZER(grammar::binary_multiplying_operator)
 //RECOGNIZER(grammar::SEMI)
-RECOGNIZER(grammar::statement)
+//RECOGNIZER(grammar::statement)
 //RECOGNIZER(grammar::identifier)
 //RECOGNIZER(grammar::number)
 //RECOGNIZER(grammar::LPAR)
 //RECOGNIZER(grammar::RPAR)
+
+template<typename Operator>
+struct operation
+{
+    template<typename Input>
+    static void apply(const Input &in, states::operation &st)
+    {
+        st.setOperator(in.string());
+    }
+};
+
+template<> struct actions<grammar::PLUS_sym>  : operation<grammar::PLUS_sym>
+{ };
+template<> struct actions<grammar::STAR_sym>  : operation<grammar::STAR_sym>
+{ };
+template<> struct actions<grammar::MINUS_sym> : operation<grammar::MINUS_sym>
+{ };
+template<> struct actions<grammar::SLASH_sym> : operation<grammar::SLASH_sym>
+{ };
 
 int main(int argc, char *argv[])
 {
@@ -154,25 +175,30 @@ int main(int argc, char *argv[])
        return 0;
    }
    for (decltype(argc) i = 1; i < argc; ++i) {
-       int parse_errors = 0;
-       try {
-           tao::pegtl::argv_input<> file(argv, i, argv[i]);
-           //tao::pegtl::file_parser parser(file);
-           //parser.parse<grammar, actions, controls>();
-           auto res = tao::pegtl::parse<grammar::compilation, actions, controls>(file, parse_errors);
-           if (res && (parse_errors == 0u)) {
-             std::cout << "Good parse" << std::endl;
-           } else {
-             std::cout << "Bad parse, "
-                       << parse_errors
-                       << " errors found."
-                       << std::endl;
-           }
-       } catch (const tao::pegtl::parse_error &e) {
-           std::cout << e.what() << std::endl;
-       } catch (const tao::pegtl::input_error &e) {
-           std::cout << e.what() << std::endl;
+     try {
+       using compilation = grammar::compilation;
+       using tao::pegtl::parse;
+       using tao::pegtl::argv_input;
+
+       argv_input<> file(argv, i, argv[i]);
+       states::statement_list root;
+       auto res = parse<compilation, actions, controls>(file, root);
+       if (res && (parse_errors == 0u)) {
+         std::cout << "Good parse" << std::endl;
+       } else {
+         std::cout << "Bad parse, "
+                   << parse_errors
+                   << " errors found."
+                   << std::endl;
        }
+       printing_visitor v;
+       auto node = root.get();
+       //node->accept(v);
+     } catch (const tao::pegtl::parse_error &e) {
+       std::cout << e.what() << std::endl;
+     } catch (const tao::pegtl::input_error &e) {
+       std::cout << e.what() << std::endl;
+     }
    }
    return 0;
 }

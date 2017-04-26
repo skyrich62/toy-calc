@@ -27,7 +27,7 @@ struct RPAR  : pad<RPAR_sym,  ignore> { };
 struct SEMI  : pad<SEMI_sym,  ignore> { };
 
 struct identifier_first : ranges<'a', 'z', 'A', 'Z'> { };
-struct identifier_next : ranges<'a', 'z', 'A', 'Z', '0', '9', '_'> { };
+struct identifier_next  : ranges<'a', 'z', 'A', 'Z', '0', '9', '_'> { };
 
 struct identifier : seq<
                       identifier_first,
@@ -62,12 +62,23 @@ struct recover_list : seq<
 struct term;
 struct factor;
 
-struct expression : seq<
-                      opt<unary_adding_operator>,
-                      recover_list<term, binary_adding_operator, success>
+struct expression : state<states::binary_operation,
+                      sor<
+                        state<states::prefix_unary_operation,
+                          unary_adding_operator,
+                          term
+                        >,
+                        term
+                      >,
+                      star<
+                        binary_adding_operator,
+                        recover<term, success>
+                      >
                     > { };
 
-struct term : recover_list<factor, binary_multiplying_operator, success> { };
+struct term : state<states::binary_operation,
+                recover_list<factor, binary_multiplying_operator, success>
+              > { };
 
 struct factor : sor<
                   seq<
@@ -80,10 +91,13 @@ struct factor : sor<
                 > { };
 
 
-struct statement : seq< recover<expression, opt<ignore>>, SEMI> { };
+struct statement : state<states::statement,
+                     recover<expression, SEMI>,
+                     SEMI
+                   > { };
 
 struct compilation :seq<
-                      plus<recover<statement, SEMI>>,
+                      plus<recover< statement, SEMI>>,
                       eof
                     > { };
 

@@ -2,15 +2,21 @@ CXXFLAGS=-std=c++14 -g -I ../PEGTL/include $(TRACE)
 
 all: main
 
-OBJS = main.o
+OBJS = main.o nodes.o states.o pvisitor.o
 
-main.o: grammar.h main.cc
+main.o: grammar.h states.h nodes.h main.cc
 
 main: $(OBJS)
 	$(CXX) -g $(OBJS) -o main
 
+states.o: states.h nodes.h states.cc
+
+nodes.o: nodes.h nodes.cc
+
+pvisitor.o: pvisitor.cc pvisitor.h nodes.h
+
 clean:
-	rm -rf main.o main
+	rm -rf $(OBJS) main
 
 trace:
 	$(MAKE) TRACE=-DTRACE clean all
