@@ -7,6 +7,47 @@ namespace states
 {
     using ptr = nodes::node::ptr;
 
+class statement_list
+{
+public:
+    statement_list() : _stmts(new nodes::statement_list) { }
+
+    template<typename Input, typename... States>
+    statement_list(const Input &in, States&& ... st) :
+        _stmts(new nodes::statement_list)
+    { }
+
+    template<typename Input, typename... States>
+    void success(const Input &in, States&& ... st)
+    { }
+
+    void addStatement(ptr stmt);
+    ptr get() const                              { return _stmts; }
+private:
+    ptr _stmts;
+};
+
+class statement
+{
+public:
+    template<typename Input, typename... States>
+    statement(const Input &in, States&& ... st) :
+        _stmt(new nodes::statement)
+    {
+    }
+
+    template<typename Input, typename... States>
+    void success(const Input &in, statement_list &st)
+    {
+        st.addStatement(_stmt);
+    }
+
+    void setExpression(ptr expr);
+
+private:
+    ptr _stmt;
+};
+
 class expression
 {
 public:
@@ -14,6 +55,18 @@ public:
 
     void set(ptr expr)                    { _expr = expr; }
     ptr get() const                       { return _expr; }
+
+    template<typename Input, typename... States>
+    void success(const Input &in, expression& st)
+    {
+        st.set(get());
+    }
+
+    template<typename Input, typename... States>
+    void success(const Input &in, statement& st)
+    {
+        st.setExpression(get());
+    }
 
 private:
     ptr _expr;
@@ -30,6 +83,7 @@ public:
     {
         get()->addChild(op);
     }
+
 };
 
 class prefix_unary_operation : public operation
@@ -39,10 +93,6 @@ public:
 
     template<typename Input, typename... States>
     prefix_unary_operation(const Input &in, States&& ...st)
-    { }
-
-    template<typename Input, typename... States>
-    void success(const Input &in, States&& ... st)
     { }
 
     virtual void setOperator(const std::string &op);
@@ -57,48 +107,8 @@ public:
     binary_operation(const Input &in, States&& ... st)
     { }
 
-    template<typename Input, typename... States>
-    void success(const Input &in, States&& ... st)
-    { }
-
     virtual void setOperator(const std::string &op);
 
-};
-
-class statement
-{
-public:
-    template<typename Input, typename... States>
-    statement(const Input &in, States&& ... st)
-    { }
-
-    template<typename Input, typename... States>
-    void success(const Input &in, States&& ... st)
-    { }
-
-    void setExpression(ptr expr);
-
-private:
-    ptr _stmt;
-};
-
-class statement_list
-{
-public:
-    statement_list() = default;
-
-    template<typename Input, typename... States>
-    statement_list(const Input &in, States&& ... st)
-    { }
-
-    template<typename Input, typename... States>
-    void success(const Input &in, States&& ... st)
-    { }
-
-    void addStatement(ptr stmt);
-    ptr get() const                              { return _stmts; }
-private:
-    ptr _stmts;
 };
 
 } // namespace states
