@@ -98,3 +98,28 @@ a+;:1:0(0): *** Recognized a grammar::statement: a+<error_missing_operand>;
 ```
 
 But that's an exercise for another time. :)
+
+## Update
+The recognizer has been commented out.  Now a full parse-tree is created, and then printed out after the parse.
+Just for fun, I've also added a reconstructer which reconstructs the original input.
+
+New sample runs look like this:
+
+```
+$ ./main '(a+b) * (c-d);'
+Good parse
+----- Parse tree -------
+0: statement_list
+1: statement, expression: 6
+6: binary_op:  *, operands: 2 7
+2: parend_expr, expression: 4
+4: binary_op:  +, operands: 3 5
+3: identifier: a
+5: identifier: b
+7: parend_expr, expression: 9
+9: binary_op:  -, operands: 8 10
+8: identifier: c
+10: identifier: d
+----- Reconstruction ----
+(a + b) * (c - d);
+```
