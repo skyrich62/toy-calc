@@ -133,7 +133,6 @@ public:
     template<typename Input, typename... States>
     parend_expr(const Input &in, States&& ...st)
     {
-        std::cout << "creating parend_expr node" << std::endl;
         set(ptr(new nodes::parend_expr));
     }
     virtual void setOperator(const std::string &op)  { }
