@@ -1,9 +1,16 @@
+#include <iostream>
 #include "states.h"
 
 namespace states
 {
 expression::~expression()
 {
+}
+
+nodes::expression*
+expression::expr() const
+{
+    return dynamic_cast<nodes::expression*>(_expr.get());
 }
 
 operation::~operation()
@@ -27,9 +34,10 @@ binary_operation::~binary_operation()
 }
 
 void
-binary_operation::setOperator(const std::string &)
+binary_operation::setOperator(const std::string &op)
 {
     auto p = new nodes::binary_operator;
+    p->setOperator(op);
     p->addChild(get());
     set(ptr(p));
 }

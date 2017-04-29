@@ -15,6 +15,7 @@ public:
     virtual void visit(nodes::identifier &, nodes::traversal &, int);
     virtual void visit(nodes::statement &, nodes::traversal &, int);
     virtual void visit(nodes::statement_list &, nodes::traversal &, int);
+    virtual void visit(nodes::parend_expr &, nodes::traversal &, int);
 private:
     visitor *_visitor;
 };
@@ -30,6 +31,7 @@ public:
     virtual void visit(nodes::identifier &, nodes::traversal &, int);
     virtual void visit(nodes::statement &, nodes::traversal &, int);
     virtual void visit(nodes::statement_list &, nodes::traversal &, int);
+    virtual void visit(nodes::parend_expr &, nodes::traversal &, int);
 };
 
 #endif // } _RVISITOR_H__

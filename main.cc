@@ -1,8 +1,10 @@
 #include <iostream>
 #include <iomanip>
+#include <sstream>
 #include "states.h"
 #include "grammar.h"
 #include "pvisitor.h"
+#include "rvisitor.h"
 
 #include "tao/pegtl/analyze.hpp"
 #include "tao/pegtl/argv_input.hpp"
@@ -163,6 +165,31 @@ template<> struct actions<grammar::MINUS_sym> : operation<grammar::MINUS_sym>
 template<> struct actions<grammar::SLASH_sym> : operation<grammar::SLASH_sym>
 { };
 
+template<> struct actions<grammar::identifier>
+{
+    template<typename Input>
+    static void apply(const Input &in, states::operation &st)
+    {
+        auto node = new nodes::identifier;
+        node->setIdentifier(in.string());
+        st.addOperand(std::shared_ptr<nodes::node>(node));
+    }
+};
+
+template<> struct actions<grammar::number>
+{
+    template<typename Input>
+    static void apply(const Input &in, states::operation &st)
+    {
+        std::istringstream is(in.string());
+        long long int val;
+        is >> val;
+        auto node = new nodes::numeric_literal;
+        node->setValue(val);
+        st.addOperand(std::shared_ptr<nodes::node>(node));
+    }
+};
+
 int main(int argc, char *argv[])
 {
 
@@ -191,9 +218,17 @@ int main(int argc, char *argv[])
                    << " errors found."
                    << std::endl;
        }
-       printing_visitor v;
-       auto node = root.get();
-       //node->accept(v);
+       printing_visitor pv;
+       nodes::traversal ilt(pv);
+
+       std::cout << "----- Parse tree ------- " << std::endl;
+       ilt.traverse(*(root.get()), nodes::traversal::PRE);
+
+       std::cout << "----- Reconstruction ----" << std::endl;
+       reconstructing_visitor rv;
+       natural_visitor nv(rv);
+       ilt.set_visitor(nv);
+       ilt.traverse(*(root.get()), nodes::traversal::NATURAL);
      } catch (const tao::pegtl::parse_error &e) {
        std::cout << e.what() << std::endl;
      } catch (const tao::pegtl::input_error &e) {

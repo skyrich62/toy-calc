@@ -6,14 +6,15 @@
 class printing_visitor : public nodes::visitor
 {
 public:
-    virtual void visit(nodes::node &);
-    virtual void visit(nodes::error &);
-    virtual void visit(nodes::prefix_unary_operator &);
-    virtual void visit(nodes::binary_operator &);
-    virtual void visit(nodes::numeric_literal &);
-    virtual void visit(nodes::identifier &);
-    virtual void visit(nodes::statement &);
-    virtual void visit(nodes::statement_list &);
+    virtual void visit(nodes::node &, nodes::traversal &, int);
+    virtual void visit(nodes::error &, nodes::traversal &, int);
+    virtual void visit(nodes::prefix_unary_operator &, nodes::traversal &, int);
+    virtual void visit(nodes::binary_operator &, nodes::traversal &, int);
+    virtual void visit(nodes::numeric_literal &, nodes::traversal &, int);
+    virtual void visit(nodes::identifier &, nodes::traversal &, int);
+    virtual void visit(nodes::statement &, nodes::traversal &, int);
+    virtual void visit(nodes::statement_list &, nodes::traversal &, int);
+    virtual void visit(nodes::parend_expr &, nodes::traversal &, int);
 };
 
 #endif // } _PVISITOR_H__

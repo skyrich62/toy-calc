@@ -80,12 +80,14 @@ struct term : state<states::binary_operation,
                 recover_list<factor, binary_multiplying_operator, success>
               > { };
 
+struct parend_expr : seq<
+                       LPAR,
+                       state<states::parend_expr, expression>,
+                       recover<RPAR, success>
+                     > { };
+
 struct factor : sor<
-                  seq<
-                    LPAR,
-                    expression,
-                    recover<RPAR, success>
-                  >,
+                  parend_expr,
                   number,
                   identifier
                 > { };

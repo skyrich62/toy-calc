@@ -36,7 +36,7 @@ public:
     {
     }
 
-    template<typename Input, typename... States>
+    template<typename Input>
     void success(const Input &in, statement_list &st)
     {
         st.addStatement(_stmt);
@@ -48,25 +48,40 @@ private:
     ptr _stmt;
 };
 
+class operation;
+
 class expression
 {
 public:
+    expression() = default;
+
+    template<typename Input>
+    expression(const Input &in, expression &st)
+    {
+        set(st.get());
+    }
+
     virtual ~expression();
 
     void set(ptr expr)                    { _expr = expr; }
     ptr get() const                       { return _expr; }
 
-    template<typename Input, typename... States>
+    template<typename Input>
     void success(const Input &in, expression& st)
     {
         st.set(get());
     }
 
-    template<typename Input, typename... States>
+    template<typename Input>
+    void success(const Input &in, operation& st);
+
+    template<typename Input>
     void success(const Input &in, statement& st)
     {
         st.setExpression(get());
     }
+
+    nodes::expression* expr() const;
 
 private:
     ptr _expr;
@@ -81,9 +96,24 @@ public:
     virtual void setOperator(const std::string &op) = 0;
     void addOperand(ptr op)
     {
-        get()->addChild(op);
+        if (get()) {
+            get()->addChild(op);
+        } else {
+            set(op);
+        }
     }
+};
 
+class parend_expr : public operation
+{
+public:
+    template<typename Input, typename... States>
+    parend_expr(const Input &in, States&& ...st)
+    {
+        std::cout << "creating parend_expr node" << std::endl;
+        set(ptr(new nodes::parend_expr));
+    }
+    virtual void setOperator(const std::string &op)  { }
 };
 
 class prefix_unary_operation : public operation
@@ -103,6 +133,7 @@ class binary_operation : public operation
 public:
     binary_operation() = default;
     virtual ~binary_operation();
+
     template<typename Input, typename... States>
     binary_operation(const Input &in, States&& ... st)
     { }
@@ -110,6 +141,12 @@ public:
     virtual void setOperator(const std::string &op);
 
 };
+
+template<typename Input>
+void expression::success(const Input &in, operation& st)
+{
+    st.addOperand(get());
+}
 
 } // namespace states
 #endif // } _STATES_H__
