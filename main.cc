@@ -103,8 +103,32 @@ struct missing
 {
     static const std::string expected_message;
 
-    template<typename Input, typename... States>
-    static void apply(const Input &in, States&& ...st)
+    template<typename Input>
+    static void apply(const Input &in, states::operation &st)
+    {
+        error_msg(in);
+        auto error = new nodes::error;
+        st.addOperand(std::shared_ptr<nodes::node>(error));
+    }
+
+    template<typename Input>
+    static void apply(const Input &in, states::statement_list &st)
+    {
+        error_msg(in);
+        auto error = new nodes::error;
+        st.addStatement(std::shared_ptr<nodes::node>(error));
+    }
+
+    template<typename Input>
+    static void apply(const Input &in, states::statement &st)
+    {
+        error_msg(in);
+        auto error = new nodes::error;
+        st.setExpression(std::shared_ptr<nodes::node>(error));
+    }
+
+    template<typename Input>
+    static void error_msg(const Input &in)
     {
         ++parse_errors;
         std::cout << in.position()
