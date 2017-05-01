@@ -34,6 +34,7 @@ natural_visitor::visit(nodes::node &n, nodes::traversal &ilt, int mode)
 void
 natural_visitor::visit(nodes::error &n, nodes::traversal &ilt, int mode)
 {
+    _visitor->visit(n, ilt, mode);
 }
 
 void
@@ -106,7 +107,7 @@ reconstructing_visitor::visit(nodes::node &n, nodes::traversal &, int)
 void
 reconstructing_visitor::visit(nodes::error &n, nodes::traversal &, int)
 {
-    std::cout << "error" << std::endl;
+    std::cout << "{error}";
 }
 
 void

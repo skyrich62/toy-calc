@@ -86,6 +86,12 @@ parend_expr::accept(visitor &v, traversal &ilt, int mode)
     v.visit(*this, ilt, mode);
 }
 
+void
+error::accept(visitor &v, traversal &ilt, int mode)
+{
+    v.visit(*this, ilt, mode);
+}
+
 // ----------------------- traversal -------------------------------
 
 void
