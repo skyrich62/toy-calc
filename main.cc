@@ -104,6 +104,14 @@ struct missing
     static const std::string expected_message;
 
     template<typename Input>
+    static void apply(const Input &in, states::expression &st)
+    {
+        error_msg(in);
+        auto error = new nodes::error;
+        st.set(std::shared_ptr<nodes::node>(error));
+    }
+
+    template<typename Input>
     static void apply(const Input &in, states::operation &st)
     {
         error_msg(in);
