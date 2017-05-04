@@ -34,7 +34,11 @@ void
 printing_visitor::visit(nodes::error &n, nodes::traversal &, int)
 {
     std::cout << n.node_id() << ": ";
-    std::cout << "error" << std::endl;
+    std::cout << "error, children: ";
+    for (auto it = n.cbegin(); it != n.cend(); ++it) {
+        std::cout << (*it)->node_id() << " ";
+    }
+    std::cout << std::endl;
 }
 
 void
