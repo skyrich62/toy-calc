@@ -117,12 +117,12 @@ struct factor : sor<
 
 
 struct statement : state<states::statement,
-                     recover<expression, SEMI>,
-                     SEMI
+                     recover<expression, ignore>,
+                     recover<SEMI, eolf>
                    > { };
 
 struct compilation :seq<
-                      plus<recover< statement, SEMI>>,
+                      plus<statement>,
                       eof
                     > { };
 
