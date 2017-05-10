@@ -123,3 +123,27 @@ Good parse
 ----- Reconstruction ----
 (a + b) * (c - d);
 ```
+
+And with an error in the input stream:
+
+```
+$ ./main '(a +) *5;'
+(a +) *5;:1:4(4): expected a term
+(a +) *5;
+    ^
+Bad parse, 1 errors found.
+----- Parse tree -------
+0: statement_list
+1: statement, expression: 6
+6: binary_op:  *, operands: 2 7
+2: parend_expr, expression: 4
+4: binary_op:  +, operands: 3 5
+3: identifier: a
+5: error, children:
+7: numeric_literal: 5
+----- Reconstruction ----
+(a + {error}) * 5;
+
+```
+
+Note the insertion of an "error" node in the AST.
